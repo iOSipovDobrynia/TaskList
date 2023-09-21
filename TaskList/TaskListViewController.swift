@@ -28,6 +28,19 @@ final class TaskListViewController: UITableViewController {
         
         navigationController?.navigationBar.standardAppearance = navBarApperance
         navigationController?.navigationBar.scrollEdgeAppearance = navBarApperance
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .add,
+            target: self,
+            action: #selector(addNewTask)
+        )
+        
+        navigationController?.navigationBar.tintColor = .white
+    }
+    
+    @objc
+    private func addNewTask() {
+        
     }
 }
 
