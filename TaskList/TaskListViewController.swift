@@ -22,7 +22,7 @@ final class TaskListViewController: UITableViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         
         let navBarApperance = UINavigationBarAppearance()
-        navBarApperance.backgroundColor = .systemPink
+        navBarApperance.backgroundColor = UIColor(named: "MilkPink")
         navBarApperance.titleTextAttributes = [.foregroundColor: UIColor.white]
         navBarApperance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
         
