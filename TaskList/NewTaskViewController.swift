@@ -6,10 +6,18 @@
 //
 
 import UIKit
+import CoreData // TODO: - remove
 
-class NewTaskViewController: UIViewController {
+final class NewTaskViewController: UIViewController {
 
+    // MARK: - Public properties
+    var delegate: TaskViewControllerDelegate!
+    
     // MARK: - Private properties
+    
+    // TODO: - remove
+    private let viewContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
     private let taskTF = UITextField()
     private let saveButton = UIButton()
     private let cancelButton = UIButton()
@@ -24,12 +32,27 @@ class NewTaskViewController: UIViewController {
     // MARK: - Actions
     @objc
     private func saveButtonPressed() {
+        saveTask()
+        delegate.reloadData()
         dismiss(animated: true)
     }
     
     @objc
     private func cancelButtonPressed() {
         dismiss(animated: true)
+    }
+    
+    private func saveTask() {
+        let task = Task(context: viewContext)
+        task.title = taskTF.text
+        
+        if viewContext.hasChanges {
+            do {
+                try viewContext.save()
+            } catch let error {
+                print(error.localizedDescription)
+            }
+        }
     }
 }
 
