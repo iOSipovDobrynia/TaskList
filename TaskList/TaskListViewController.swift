@@ -8,10 +8,6 @@
 import UIKit
 import CoreData // TODO: - remove
 
-protocol TaskViewControllerDelegate {
-    func reloadData()
-}
-
 final class TaskListViewController: UITableViewController {
 
     // MARK: - Private properties
@@ -55,9 +51,7 @@ final class TaskListViewController: UITableViewController {
     
     @objc
     private func addNewTask() {
-        let newTaskVC = NewTaskViewController()
-        newTaskVC.delegate = self
-        present(newTaskVC, animated: true)
+        showAlert(with: "New task", and: "input your task name")
     }
     
     private func fetchData() {
@@ -89,10 +83,42 @@ extension TaskListViewController {
     }
 }
 
-// MARK: - TaskViewControllerDelegate
-extension TaskListViewController: TaskViewControllerDelegate {
-    func reloadData() {
-        fetchData()
-        tableView.reloadData()
+// MARK: - UIAlertController
+extension TaskListViewController {
+    private func showAlert(with title: String, and message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        
+        let saveAction = UIAlertAction(title: "Save", style: .default) { [weak self] action in
+            guard let task = alert.textFields?.first?.text, !task.isEmpty else { return }
+            self?.save(task)
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        
+        alert.addAction(saveAction)
+        alert.addAction(cancelAction)
+        
+        alert.addTextField { textField in
+            textField.placeholder = "New task"
+        }
+        
+        present(alert, animated: true)
+    }
+    
+    private func save(_ taskName: String) {
+        let task = Task(context: viewContext)
+        task.title = taskName
+        
+        if viewContext.hasChanges {
+            do {
+                try viewContext.save()
+            } catch let error {
+                print(error.localizedDescription)
+            }
+        }
+        
+        taskList.append(task)
+        let cellIndex = IndexPath(row: taskList.count - 1, section: 0)
+        tableView.insertRows(at: [cellIndex], with: .automatic)
     }
 }
