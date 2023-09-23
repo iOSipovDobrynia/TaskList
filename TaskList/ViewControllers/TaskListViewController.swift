@@ -1,12 +1,11 @@
 //
-//  ViewController.swift
+//  TaskListViewController.swift
 //  TaskList
 //
 //  Created by Goodwasp on 20.09.2023.
 //
 
 import UIKit
-import CoreData // TODO: - remove
 
 final class TaskListViewController: UITableViewController {
 
@@ -14,8 +13,7 @@ final class TaskListViewController: UITableViewController {
     private let cellID = "task"
     private var taskList: [Task] = []
     
-    // TODO: - remove
-    private let viewContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    private let viewContext = StorageManager.shared.persistentContainer.viewContext
 
     
     // MARK: - View's life cycle
