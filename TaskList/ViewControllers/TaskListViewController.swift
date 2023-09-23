@@ -13,6 +13,7 @@ final class TaskListViewController: UITableViewController {
     private let cellID = "task"
     private var taskList: [Task] = []
     
+    private let storageManager = StorageManager.shared
     private let viewContext = StorageManager.shared.persistentContainer.viewContext
 
     
@@ -53,13 +54,7 @@ final class TaskListViewController: UITableViewController {
     }
     
     private func fetchData() {
-        let fetchRequest = Task.fetchRequest()
-        
-        do {
-            try taskList = viewContext.fetch(fetchRequest)
-        } catch let error {
-            print(error.localizedDescription)
-        }
+        taskList = storageManager.fetchTasks()
     }
 }
 
@@ -86,6 +81,7 @@ extension TaskListViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedTask = taskList[indexPath.row]
         showAlert(withTitle: "Task", andMessage: "Change your task name", oldTask: selectedTask, at: indexPath)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }
 
@@ -123,7 +119,7 @@ extension TaskListViewController {
         let task = Task(context: viewContext)
         task.title = taskName
         
-        saveContext()
+        storageManager.saveContext()
         taskList.append(task)
         let cellIndex = IndexPath(row: taskList.count - 1, section: 0)
         tableView.insertRows(at: [cellIndex], with: .automatic)
@@ -133,17 +129,7 @@ extension TaskListViewController {
         let task = taskList[indexPath.row]
         task.title = newTaskName
         
-        saveContext()
+        storageManager.saveContext()
         tableView.reloadRows(at: [indexPath], with: .automatic)
-    }
-    
-    private func saveContext() {
-        if viewContext.hasChanges {
-            do {
-                try viewContext.save()
-            } catch let error {
-                print(error.localizedDescription)
-            }
-        }
     }
 }

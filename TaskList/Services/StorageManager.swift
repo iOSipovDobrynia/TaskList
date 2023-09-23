@@ -36,4 +36,18 @@ final class StorageManager {
             }
         }
     }
+    
+    // MARK: - Fetch
+    func fetchTasks() -> [Task] {
+        var taskList: [Task] = []
+        let fetchRequest = Task.fetchRequest()
+        
+        do {
+            try taskList = persistentContainer.viewContext.fetch(fetchRequest)
+        } catch let error {
+            print(error.localizedDescription)
+        }
+        
+        return taskList
+    }
 }
