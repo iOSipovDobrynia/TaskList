@@ -14,8 +14,6 @@ final class TaskListViewController: UITableViewController {
     private var taskList: [Task] = []
     
     private let storageManager = StorageManager.shared
-    private let viewContext = StorageManager.shared.persistentContainer.viewContext
-
     
     // MARK: - View's life cycle
     override func viewDidLoad() {
@@ -53,8 +51,29 @@ final class TaskListViewController: UITableViewController {
         showAlert(withTitle: "New task", andMessage: "input your task name")
     }
     
+    private func create(_ taskName: String) {
+        storageManager.create(taskName) { task in
+            taskList.append(task)
+            let cellIndex = IndexPath(row: taskList.count - 1, section: 0)
+            tableView.insertRows(at: [cellIndex], with: .automatic)
+        }
+    }
+    
     private func fetchData() {
-        taskList = storageManager.fetchTasks()
+        storageManager.fetchData { result in
+            switch result {
+            case .success(let tasks):
+                taskList = tasks
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
+    
+    private func update(to newTaskName: String, at indexPath: IndexPath) {
+        let task = taskList[indexPath.row]
+        storageManager.update(task: task, with: newTaskName)
+        tableView.reloadRows(at: [indexPath], with: .automatic)
     }
 }
 
@@ -77,9 +96,10 @@ extension TaskListViewController {
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
+            storageManager.delete(taskList[indexPath.row])
             taskList.remove(at: indexPath.row)
-            viewContext.delete(taskList[indexPath.row])
             tableView.deleteRows(at: [indexPath], with: .automatic)
+            storageManager.saveContext()
         }
     }
 }
@@ -102,9 +122,9 @@ extension TaskListViewController {
             guard let taskName = alert.textFields?.first?.text, !taskName.isEmpty else { return }
             
             if let _ = oldTask, let indexPath = indexPath {
-                self?.editOldTaskName(to: taskName, at: indexPath)
+                self?.update(to: taskName, at: indexPath)
             } else {
-                self?.save(taskName)
+                self?.create(taskName)
             }
         }
         
@@ -121,23 +141,5 @@ extension TaskListViewController {
         }
         
         present(alert, animated: true)
-    }
-    
-    private func save(_ taskName: String) {
-        let task = Task(context: viewContext)
-        task.title = taskName
-        
-        storageManager.saveContext()
-        taskList.append(task)
-        let cellIndex = IndexPath(row: taskList.count - 1, section: 0)
-        tableView.insertRows(at: [cellIndex], with: .automatic)
-    }
-    
-    private func editOldTaskName(to newTaskName: String, at indexPath: IndexPath) {
-        let task = taskList[indexPath.row]
-        task.title = newTaskName
-        
-        storageManager.saveContext()
-        tableView.reloadRows(at: [indexPath], with: .automatic)
     }
 }
