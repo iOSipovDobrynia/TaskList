@@ -128,8 +128,8 @@ extension TaskListViewController {
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
         
-        alert.addAction(saveAction)
         alert.addAction(cancelAction)
+        alert.addAction(saveAction)
         
         alert.addTextField { textField in
             textField.placeholder = "New task"
