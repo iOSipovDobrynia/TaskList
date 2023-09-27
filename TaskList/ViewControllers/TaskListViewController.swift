@@ -69,12 +69,6 @@ final class TaskListViewController: UITableViewController {
             }
         }
     }
-    
-    private func update(to newTaskName: String, at indexPath: IndexPath) {
-        let task = taskList[indexPath.row]
-        storageManager.update(task: task, with: newTaskName)
-        tableView.reloadRows(at: [indexPath], with: .automatic)
-    }
 }
 
 // MARK: - UITableViewDataSource
@@ -94,6 +88,7 @@ extension TaskListViewController {
         return cell
     }
     
+    // delete
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             storageManager.delete(taskList[indexPath.row])
@@ -105,6 +100,7 @@ extension TaskListViewController {
 
 // MARK: - UITableViewDelegate
 extension TaskListViewController {
+    // edit
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let selectedTask = taskList[indexPath.row]
@@ -122,13 +118,12 @@ extension TaskListViewController {
         let saveAction = UIAlertAction(title: "Save", style: .default) { [weak self] action in
             guard let taskName = alert.textFields?.first?.text, !taskName.isEmpty else { return }
             
-            guard let task = task else {
+            guard let task = task, let completion = completion  else {
                 self?.create(taskName)
                 return
             }
-            if let completion = completion {
-                completion()
-            }
+            self?.storageManager.update(task: task, with: taskName)
+            completion()
         }
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
